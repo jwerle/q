@@ -12,6 +12,15 @@ $ bpkg install jwerle/q
 
 ## usage
 
+```
+usage: q [-hV]
+   or: q push [data]
+   or: q shift
+   or: q lock
+   or: q unlock
+   or: q clear
+```
+
 `q(1)` is a dead simple message queue written in bash. You can queue
 messages or lock into a fifo. Messgaes are pushed and shifted. Messages
 are persisted in a log file that may be cleared.
@@ -53,4 +62,4 @@ $ q unlock
 ## license
 
 MIT
->>>>>>> init
+
