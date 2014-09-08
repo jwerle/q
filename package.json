@@ -1,0 +1,9 @@
+{
+  "name": "q",
+  "version": "0.0.1",
+  "description": "Simple message queuing",
+  "global": "true",
+  "install": "make install",
+  "scripts": [ "q.sh" ]
+}
+
