@@ -19,11 +19,12 @@ usage: q [-hV]
    or: q lock
    or: q unlock
    or: q clear
+   or: q stream
 ```
 
 `q(1)` is a dead simple message queue written in bash. You can queue
 messages or lock into a fifo. Messgaes are pushed and shifted. Messages
-are persisted in a log file that may be cleared.
+may be persisted in a log file that may be cleared when unlocked.
 
 Push a message:
 
@@ -43,7 +44,7 @@ boop
 
 ```
 
-You can lock the queue so a message must be acknowledged before another
+You can lock the q so a message must be acknowledged before another
 can be pushed on to it.
 
 ```sh
@@ -57,6 +58,20 @@ $ q shift
 boop
 
 $ q unlock
+```
+
+The q can be streamed as well
+
+```sh
+$ unlock
+$ q push a
+$ q push b
+$ q push c
+$ q stream
+a
+b
+c
+
 ```
 
 ## license
