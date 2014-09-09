@@ -99,7 +99,7 @@ qpush () {
 
   ## write data from command line
   if ! [ -z "${data}" ]; then
-    echo -ne "${data}" >> "${dest}"
+    echo -e "${data}" >> "${dest}"
   fi
 
   ## write data from stdin if stdin is pipe
@@ -123,21 +123,15 @@ qshift () {
       rm -f "${LOG}" && touch "${LOG}"
       if test -f "${LOCK}"; then
         ## read from fifo
-        cat "${FIFO}"
+        while true; do
+          cat "${FIFO}"
+        done
       fi
       ;;
 
     *)
       ## read log
       local log=($(<"${LOG}"))
-      if [ -z "${log[0]}" ]; then
-        if test -f "${LOCK}"; then
-          ## read from fifo
-          cat "${FIFO}"
-        else
-          return 1
-        fi
-      fi
       ## echo head
       echo "${log[0]}"
       ## truncate log
@@ -145,6 +139,12 @@ qshift () {
       for (( i = 1; i < "${#log[@]}"; i++ )); do
         echo "${log[${i}]}" >> "${LOG}"
       done
+      if test -f "${LOCK}"; then
+        ## read from fifo
+        cat "${FIFO}"
+      elif [ -z "${log[0]}" ]; then
+        return 1
+      fi
       ;;
   esac
 
