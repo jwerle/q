@@ -123,12 +123,15 @@ qshift () {
       cat "${LOG}"
       ## truncate log
       rm -f "${LOG}" && touch "${LOG}"
-      if test -f "${LOCK}"; then
-        ## read from fifo
-        while true; do
+      ## read from fifo
+      while true; do
+        if test -f "${LOCK}"; then
+          echo poll
           cat "${FIFO}"
-        done
-      fi
+        else
+          break
+        fi
+      done
       ;;
 
     *)
@@ -168,6 +171,8 @@ qunlock () {
 ## clear q log
 qclear () {
   if test -f "${LOG}"; then
+    cat "${FIFO}" >/dev/null &
+    echo > "${FIFO}"
     rm -f "${FIFO}"
     rm -f "${LOG}"
     touch "${LOG}"
