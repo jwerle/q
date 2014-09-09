@@ -105,7 +105,7 @@ qpush () {
   ## write data from stdin if stdin is pipe
   if [ ! -t 0 ]; then
     while read -r buffer; do
-      echo -ne "${buffer}" >> "${dest}"
+      echo -e "${buffer}" >> "${dest}"
     done
   fi
 
@@ -166,6 +166,7 @@ qunlock () {
 ## clear q log
 qclear () {
   if test -f "${LOG}"; then
+    rm -f "${FIFO}"
     rm -f "${LOG}"
     touch "${LOG}"
   fi
