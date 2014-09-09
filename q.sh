@@ -99,13 +99,13 @@ qpush () {
 
   ## write data from command line
   if ! [ -z "${data}" ]; then
-    echo "${data}" >> "${dest}"
+    echo -ne "${data}" >> "${dest}"
   fi
 
   ## write data from stdin if stdin is pipe
   if [ ! -t 0 ]; then
     while read -r buffer; do
-      echo "${buffer}" >> "${dest}"
+      echo -ne "${buffer}" >> "${dest}"
     done
   fi
 
@@ -114,26 +114,39 @@ qpush () {
 
 ## shift data from q
 qshift () {
-  ## detect if already locked
-  if test -f "${LOCK}"; then
-    ## read from log
-    cat "${LOG}"
-    ## read from fifo
-    cat "${FIFO}"
-  else
-    ## read log
-    local log=($(<"${LOG}"))
-    if [ -z "${log[0]}" ]; then
-      return 1
-    fi
-    ## echo head
-    echo "${log[0]}"
-    ## truncate log
-    rm -f "${LOG}" && touch "${LOG}"
-    for (( i = 1; i < "${#log[@]}"; i++ )); do
-      echo "${log[${i}]}" >> "${LOG}"
-    done
-  fi
+  declare local op="${1}"
+  case "${op}" in
+    stream)
+      ## stream l og
+      cat "${LOG}"
+      ## truncate log
+      rm -f "${LOG}" && touch "${LOG}"
+      if test -f "${LOCK}"; then
+        ## read from fifo
+        cat "${FIFO}"
+      fi
+      ;;
+
+    *)
+      ## read log
+      local log=($(<"${LOG}"))
+      if [ -z "${log[0]}" ]; then
+        if test -f "${LOCK}"; then
+          ## read from fifo
+          cat "${FIFO}"
+        else
+          return 1
+        fi
+      fi
+      ## echo head
+      echo "${log[0]}"
+      ## truncate log
+      rm -f "${LOG}" && touch "${LOG}"
+      for (( i = 1; i < "${#log[@]}"; i++ )); do
+        echo "${log[${i}]}" >> "${LOG}"
+      done
+      ;;
+  esac
 
   return $?
 }
@@ -161,7 +174,7 @@ qclear () {
 
 ## stream queue
 qstream () {
-  while qshift; do :; done
+  qshift 'stream'
   return $?
 }
 
