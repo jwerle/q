@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## q version
-Q_VERSION="0.0.5"
+Q_VERSION="0.0.6"
 
 ## q directory
 Q="${Q:-${HOME}/.q}"

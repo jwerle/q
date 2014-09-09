@@ -1,6 +1,6 @@
 {
   "name": "q",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Simple message queuing",
   "global": "true",
   "install": "make install",
