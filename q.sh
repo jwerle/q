@@ -42,6 +42,7 @@ usage () {
   echo "   or: q shift"
   echo "   or: q lock"
   echo "   or: q unlock"
+  echo "   or: q stream"
   echo "   or: q clear"
   return 0
 }
@@ -57,17 +58,19 @@ main () {
   case "${arg}" in
     -V|--version) echo "${Q_VERSION}" ;;
 
-    -h|--help) (usage) ;;
+    -h|--help) usage ;;
 
-    push) (qpush "${@}") ;;
+    push) qpush "${@}" ;;
 
-    shift) (qshift "${@}") ;;
+    shift) qshift "${@}" ;;
 
-    lock) (qlock "${@}") ;;
+    lock) qlock "${@}" ;;
 
-    unlock) (qunlock "${@}") ;;
+    unlock) qunlock "${@}" ;;
 
-    clear) (qclear "${@}") ;;
+    clear) qclear "${@}" ;;
+
+    stream) qstream "${@}" ;;
 
     *)
       if [ "-" == "${arg:0:1}" ]; then
@@ -76,7 +79,7 @@ main () {
         echo >&2 "error: Unknown command \`${arg}'"
       fi
 
-      (usage >&2)
+      usage >&2
       return 1
       ;;
   esac
@@ -88,7 +91,7 @@ main () {
 qpush () {
   local data="${@}"
   local dest="${FIFO}"
-  declare -i local req=0
+
   ## determine if lock is present
   if ! test -f "${LOCK}"; then
     dest="${LOG}"
@@ -96,14 +99,13 @@ qpush () {
 
   ## write data from command line
   if ! [ -z "${data}" ]; then
-    (echo "${data}" >> "${dest}")
-    req=$!
+    echo "${data}" >> "${dest}"
   fi
 
   ## write data from stdin if stdin is pipe
   if [ ! -t 0 ]; then
     while read -r buffer; do
-      (echo "${buffer}" >> "${dest}")
+      echo "${buffer}" >> "${dest}"
     done
   fi
 
@@ -138,25 +140,13 @@ qshift () {
 
 ## lock q
 qlock () {
-  if test -f "${LOCK}"; then
-    echo >&2 "error: LOCK file \`${LOCK}' already exists"
-    return 1
-  else
-    touch "${LOCK}"
-  fi
-
+  touch "${LOCK}"
   return $?
 }
 
 ## unlock q
 qunlock () {
-  if ! test -f "${LOCK}"; then
-    echo >&2 "error: LOCK file \`${LOCK}' doesn't exist"
-    return 1
-  else
-    rm -f "${LOCK}"
-  fi
-
+  rm -f "${LOCK}"
   return $?
 }
 
@@ -166,6 +156,12 @@ qclear () {
     rm -f "${LOG}"
     touch "${LOG}"
   fi
+  return $?
+}
+
+## stream queue
+qstream () {
+  while qshift; do :; done
   return $?
 }
 
