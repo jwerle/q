@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## q version
-Q_VERSION="0.0.4"
+Q_VERSION="0.0.5"
 
 ## q directory
 Q="${Q:-${HOME}/.q}"
@@ -73,10 +73,12 @@ main () {
     stream) qstream "${@}" ;;
 
     *)
-      if [ "-" == "${arg:0:1}" ]; then
-        echo >&2 "error: Unknown option \`${arg}'"
-      else
-        echo >&2 "error: Unknown command \`${arg}'"
+      if ! [ -z "${arg}" ]; then
+        if [ "-" == "${arg:0:1}" ]; then
+          echo >&2 "error: Unknown option \`${arg}'"
+        else
+          echo >&2 "error: Unknown command \`${arg}'"
+        fi
       fi
 
       usage >&2
